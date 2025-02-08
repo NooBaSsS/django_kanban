@@ -1,0 +1,14 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>{{ task.title }}</title>
+{% endblock %}
+{% block body %}
+
+    <h1>{{ task.title }}</h1>
+    <h3>{{ task.description }}</h3>
+    {% if task.image %}
+    <img src="{{ task.image.url }}" alt="{{ task.title }}"><br>
+    {% endif %}
+    <a href="{% url 'tasks:list' %}">return</a>
+
+{% endblock %}
