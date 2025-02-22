@@ -15,10 +15,34 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
-from .forms import TaskAddForm
-from .models import Task
+from .forms import TaskAddForm, KanbanAddForm
+from .models import Task, Kanban
 
 tasks = [i for i in range(1, 11)]
+
+
+class KanbanListView(UserPassesTestMixin, ListView):
+    model = Kanban
+    template_name = 'tasks/kanban_list.html'
+    context_object_name = 'kanbans'
+
+    def test_func(self) -> bool:
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self) -> HttpResponseRedirect:
+        return HttpResponseForbidden(
+            render(self.request, 'tasks/forbidden.html', {'message': 'Для просмотра канбанов войдите или зарегистрирутесь'})
+        )
+
+    def get_queryset(self) -> QuerySet:
+        if self.request.user.is_authenticated:
+            return Kanban.objects.filter(owner=self.request.user)
+        return Kanban.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_authenticated'] = self.request.user.is_authenticated
+        return context
 
 
 class AppWelcomeScreen(TemplateView):
@@ -30,32 +54,25 @@ class AppWelcomeScreen(TemplateView):
         context['is_authenticated'] = self.request.user.is_authenticated
         return context
 
-class TaskListView(UserPassesTestMixin, ListView):
-    model = Task
-    template_name = 'tasks/list.html'
-    context_object_name = 'tasks'
+
+class KanbanDetailView(UserPassesTestMixin, DetailView):
+    model = Kanban
+    template_name = 'tasks/kanban_detail.html'
+    context_object_name = 'kanban'
 
     def test_func(self) -> bool:
-        return self.request.user.is_authenticated
+        kanban = self.get_object()
+        return kanban.owner == self.request.user
 
     def handle_no_permission(self) -> HttpResponseRedirect:
         return HttpResponseForbidden(
-            render(self.request, 'tasks/forbidden.html', {'message': 'Для просмотра задач войдите или зарегистрирутесь'})
+            render(self.request, 'tasks/forbidden.html', {'message': 'Вам нельзя просматривать эту доску'})
         )
 
-    def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return Task.objects.filter(owner=self.request.user)
-        return Task.objects.none()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_authenticated'] = self.request.user.is_authenticated
-        return context
 
 class TaskDetailView(UserPassesTestMixin, DetailView):
     model = Task
-    template_name = 'tasks/detail.html'
+    template_name = 'tasks/task_detail.html'
     context_object_name = 'task'
 
     def test_func(self) -> bool:
@@ -68,15 +85,52 @@ class TaskDetailView(UserPassesTestMixin, DetailView):
         )
 
 
-class TaskCreateView(UserPassesTestMixin, CreateView):
-    model = Task
-    form_class = TaskAddForm
-    template_name = 'tasks/add.html'
-    success_url = reverse_lazy('tasks:list')
+class KanbanCreateView(UserPassesTestMixin, CreateView):
+    model = Kanban
+    form_class = KanbanAddForm
+    template_name = 'tasks/kanban_add.html'
+    success_url = reverse_lazy('tasks:kanban_list')
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
+    def test_func(self) -> bool:
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self) -> HttpResponseRedirect:
+        return HttpResponseForbidden(
+            render(self.request, 'tasks/forbidden.html', {'message': 'Перед созданием канбана авторизуйтесь'})
+        )
+
+
+class KanbanDeleteView(UserPassesTestMixin, DeleteView):
+    model = Kanban
+    template_name = 'tasks/kanban_delete.html'
+    success_url = reverse_lazy('tasks:kanban_list')
+
+    def test_func(self) -> bool:
+        kanban = self.get_object()
+        return kanban.owner == self.request.user
+
+    def handle_no_permission(self) -> HttpResponseRedirect:
+        return HttpResponseForbidden(
+            render(self.request, 'tasks/forbidden.html', {'message': 'Вам нельзя удалять этот канбан'})
+        )
+
+
+class TaskCreateView(UserPassesTestMixin, CreateView):
+    model = Task
+    form_class = TaskAddForm
+    template_name = 'tasks/task_add.html'
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        form.instance.kanban = Kanban.objects.get(pk=self.kwargs['kanban_pk'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('tasks:kanban_detail', kwargs={'pk': self.object.kanban.pk})
 
     def test_func(self) -> bool:
         return self.request.user.is_authenticated
@@ -89,8 +143,10 @@ class TaskCreateView(UserPassesTestMixin, CreateView):
 
 class TaskDeleteView(UserPassesTestMixin, DeleteView):
     model = Task
-    template_name = 'tasks/delete.html'
-    success_url = reverse_lazy('tasks:list')
+    template_name = 'tasks/task_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('tasks:kanban_detail', kwargs={'pk': self.object.kanban.pk})
 
     def test_func(self) -> bool:
         task = self.get_object()
@@ -104,9 +160,11 @@ class TaskDeleteView(UserPassesTestMixin, DeleteView):
 
 class TaskUpdateView(UserPassesTestMixin, UpdateView):
     model = Task
-    template_name = 'tasks/update.html'
-    success_url = reverse_lazy('tasks:list')
+    template_name = 'tasks/task_update.html'
     form_class = TaskAddForm
+
+    def get_success_url(self):
+        return reverse_lazy('tasks:kanban_detail', kwargs={'pk': self.object.kanban.pk})
 
     def test_func(self) -> bool:
         task = self.get_object()
@@ -122,7 +180,7 @@ class AppLoginView(UserPassesTestMixin, LoginView):
     template_name = 'tasks/login.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('tasks:list')
+        return reverse_lazy('tasks:kanban_list')
 
     def test_func(self) -> bool:
         return not self.request.user.is_authenticated
@@ -138,7 +196,7 @@ class AppLogoutView(LogoutView):
 class AppSignupView(UserPassesTestMixin, CreateView):
     form_class = UserCreationForm
     template_name = 'tasks/signup.html'
-    success_url = reverse_lazy('tasks:list')
+    success_url = reverse_lazy('tasks:kanban_list')
 
     def test_func(self) -> bool:
         return not self.request.user.is_authenticated

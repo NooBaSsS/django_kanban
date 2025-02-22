@@ -1,5 +1,5 @@
 from django import forms
-from .models import Task
+from .models import Task, Kanban
 from django.conf import settings
 
 
@@ -13,11 +13,9 @@ class TaskAddForm(forms.ModelForm):
             'image': f'Изображение, не больше {settings.IMAGE_MAX_SIZE_MB}мб',
         }
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if self.cleaned_data.get('image') is None and instance.image:
-            instance.image.delete(save=False)
-            instance.image = None
-        if commit:
-            instance.save()
-        return instance
+
+class KanbanAddForm(forms.ModelForm):
+    class Meta:
+        model = Kanban
+        fields = ['title']
+        labels = {'title': 'Название'}

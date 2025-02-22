@@ -8,14 +8,31 @@ from uuid import uuid4
 from os import rename
 
 
+class Kanban(models.Model):
+    title = models.CharField(max_length=100)
+    owner = models.ForeignKey(User, related_name='kanbans', on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        verbose_name = 'Канбан'
+        verbose_name_plural = 'Канбаны'
+
+
 class Task(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     owner = models.ForeignKey(User, related_name='tasks', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='tasks/img/', blank=True, null=True)
+    kanban = models.ForeignKey(Kanban, related_name='tasks', on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.title
+
+    class Meta:
+        verbose_name = 'Задача'
+        verbose_name_plural = 'Задачи'
 
     def delete(self, *args, **kwargs): # FIXME: если файл удален то FileNotFoundError
         if self.image:

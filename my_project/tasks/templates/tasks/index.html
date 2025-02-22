@@ -33,7 +33,7 @@
         <div class="header">
             <h1 class="title">Это ваш задачник</h1>
         </div>
-        <form action="{% url 'tasks:list' %}">
+        <form action="{% url 'tasks:kanban_list' %}">
             {% if is_authenticated %}
             <input type="submit" value="Начать" class="start">
             {% else %}

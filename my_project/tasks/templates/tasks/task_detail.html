@@ -1,0 +1,20 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>{{ task.title }}</title>
+{% endblock %}
+{% block body %}
+
+    <h1>{{ task.title }}</h1>
+    <h3>{{ task.description }}</h3>
+    {% if task.image %}
+    <img src="{{ task.image.url }}" alt="{{ task.title }}"><br>
+    {% endif %}
+    <ul>
+        <li><a href="{% url 'tasks:task_update' task.pk %}">update</a></li>
+        <li><a href="{% url 'tasks:task_delete' task.pk %}">delete</a></li>
+        <li><a href="{% url 'tasks:kanban_detail' task.kanban.pk %}">return</a></li>
+    </ul>
+
+
+
+{% endblock %}
