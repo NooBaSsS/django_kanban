@@ -1,0 +1,10 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>error</title>
+{% endblock %}
+{% block body %}
+    <h1>
+        {{error_message}}
+    </h1>
+    <a href="{% url 'tasks:kanban_list' %}">К списку канбанов</a>
+{% endblock %}

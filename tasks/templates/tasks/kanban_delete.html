@@ -1,0 +1,12 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>delete</title>
+{% endblock %}
+{% block body %}
+    <h1>Удалить задачу</h1>
+    <form action="{% url 'tasks:kanban_delete' kanban.id %}" method="POST">
+        {% csrf_token %}
+        <input type="submit" value="Удалить">
+    </form>
+    <a href="{% url 'tasks:kanban_list' %}">К списку задач</a>
+{% endblock %}
