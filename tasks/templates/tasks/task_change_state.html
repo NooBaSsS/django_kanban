@@ -1,0 +1,34 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>change_state</title>
+{% endblock %}
+{% block body %}
+    <h1>Изменить статус</h1>
+    <h5>Текущий статус: {{ task.state }}</h5>
+    <form action="{% url 'tasks:task_change_state' task.id %}" method="POST">
+        {% csrf_token %}
+        {% if task.state == 'PLANNED' %}
+            <input type="submit" name="new_state" value="in_progress">
+            <input type="submit" name="new_state" value="to_review" disabled>
+            <input type="submit" name="new_state" value="done" disabled>
+        {% elif task.state == 'IN_PROGRESS' %}
+            <input type="submit" name="new_state" value="in_progress" disabled>
+            <input type="submit" name="new_state" value="to_review">
+            <input type="submit" name="new_state" value="done" disabled>
+        {% elif task.state == 'REVIEW' %}
+            <input type="submit" name="new_state" value="in_progress">
+            <input type="submit" name="new_state" value="to_review" disabled>
+            <input type="submit" name="new_state" value="done">
+        {% elif task.state == 'DONE' %}
+            <input type="submit" name="new_state" value="in_progress" disabled>
+            <input type="submit" name="new_state" value="to_review" disabled>
+            <input type="submit" name="new_state" value="done" disabled>
+        {% elif task.state == 'OVERDUE' %}
+            <input type="submit" name="new_state" value="in_progress" disabled>
+            <input type="submit" name="new_state" value="to_review" disabled>
+            <input type="submit" name="new_state" value="done" disabled>
+        {% endif %}
+
+    </form>
+    <a href="{% url 'tasks:kanban_detail' task.kanban.pk %}">К списку задач</a>
+{% endblock %}
