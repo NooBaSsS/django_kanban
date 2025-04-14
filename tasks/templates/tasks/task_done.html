@@ -1,0 +1,13 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>done</title>
+{% endblock %}
+{% block body %}
+    <h1>Выполнить задачу {{ task.title }}</h1>
+    <form action="{% url 'tasks:task_done' task.id %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Завершить задачу">
+    </form>
+    <a href="{% url 'tasks:kanban_detail' task.kanban.id %}">К списку задач</a>
+{% endblock %}

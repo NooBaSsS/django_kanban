@@ -1,0 +1,112 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>{{ kanban.title }}</title>
+{% endblock %}
+{% block body %}
+<style>
+    h4 {
+        margin: 0;
+        margin-bottom: 10px;
+    }
+    div {
+        padding: 10px;
+    }
+    ol {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    li {
+        white-space: nowrap; /* Не переносить текст */
+        overflow: hidden;
+        text-overflow: ellipsis; /* Обрезка длинных названий */
+    }
+    .field {
+        flex: 1;
+        display: flex;
+        flex-direction: column; /* Элементы списка идут вертикально */
+        min-width: 150px; /* Ограничение минимальной ширины */
+    }
+    #fields {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    #planned {
+        background-color: #00ffaa50;
+    }
+    #in_progress {
+        background-color: #aeff0050;
+    }
+    #review {
+        background-color: #0077ff50;
+    }
+    #done {
+        background-color: #00ff0050;
+    }
+    #overdue {
+        background-color: #ff000050;
+    }
+</style>
+    <h1>{{ kanban.title }}</h1>
+    <div id="fields">
+        {% if tasks_planned %}
+            <div id="planned" class="field">
+                <h4>Planned</h4>
+                <ol>
+                    {% for task in tasks_planned %}
+                        <li><a href="{% url 'tasks:task_detail' task.id %}">{{ task }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+        {% if tasks_assigned %}
+            <div id="in_progress" class="field">
+                <h4>In progress</h4>
+                <ol>
+                    {% for task in tasks_assigned %}
+                        <li><a href="{% url 'tasks:task_detail' task.id %}">{{ task }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+        {% if tasks_review %}
+            <div id="review" class="field">
+                <h4>Review</h4>
+                <ol>
+                    {% for task in tasks_review %}
+                        <li><a href="{% url 'tasks:task_detail' task.id %}">{{ task }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+        {% if tasks_done %}
+            <div id="done" class="field">
+                <h4>Done</h4>
+                <ol>
+                    {% for task in tasks_done %}
+                        <li><a href="{% url 'tasks:task_detail' task.id %}">{{ task }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+        {% if tasks_overdue %}
+            <div id="overdue" class="field">
+                <h4>Overdue</h4>
+                <ol>
+                    {% for task in tasks_overdue %}
+                        <li><a href="{% url 'tasks:task_detail' task.id %}">{{ task }}</a></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        {% endif %}
+    </div>
+
+    <ul>
+        <li><a href="{% url 'tasks:task_add' kanban.pk %}">add task</a></li>
+        <li><a href="{% url 'tasks:kanban_delete' kanban.pk %}">delete</a></li>
+        <li><a href="{% url 'tasks:kanban_list' %}">return</a></li>
+    </ul>
+
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>{{ task.title }}</title>
+{% endblock %}
+{% block body %}
+
+    <h1>{{ task.title }}</h1>
+    <h3>{{ task.description }}</h3>
+    <ul style="list-style-type: none;">
+        <li>Текущий статус: {{ task.state }}</li>
+        <li>Создано: {{ task.datetime_created|date:'d.M.Y.H.i' }} - {{ task.datetime_created|timesince }}</li>
+        {% if task.state != 'PLANNED' %}
+            <li>Назначено: {{ task.datetime_assigned|date:'d.M.Y.H.i' }} - {{ task.datetime_assigned|timesince }}</li>
+            <li>Дедлайн: {{ task.datetime_deadline|date:'d.M.Y.H.i' }} - {{ task.datetime_deadline|timeuntil }}</li>
+            <li>Исполнитель: {{ task.executor }}</li>
+        {% endif %}
+        {% if task.state not in 'PLANNED,IN_PROGRESS' %}
+            <li>Отправлена на проверку: {{ task.datetime_review|date:'d.M.Y.H.i' }} - {{ task.datetime_review|timesince }}</li>
+        {% endif %}
+        {% if task.state == 'DONE' %}
+            <li>Завершено: {{ task.datetime_done|date:'d.M.Y.H.i' }} - {{ task.datetime_done|timesince }}</li>
+        {% endif %}
+    </ul>
+    {% if task.image %}
+    <img src="{{ task.image.url }}" alt="{{ task.title }}"><br>
+    {% endif %}
+    <ul>
+        <li><a href="{% url 'tasks:task_update' task.pk %}">update</a></li>
+        <li><a href="{% url 'tasks:task_delete' task.pk %}">delete</a></li>
+        {% if task.state == 'PLANNED' or task.state == 'REVIEW' %}
+            <li><a href="{% url 'tasks:task_assign' task.pk %}">to assign</a></li>
+        {% endif %}
+        {% if task.state == 'IN_PROGRESS' %}
+            <li><a href="{% url 'tasks:task_review' task.pk %}">to review</a></li>
+        {% endif %}
+        {% if task.state == 'REVIEW' %}
+            <li><a href="{% url 'tasks:task_done' task.pk %}">done</a></li>
+        {% endif %}
+        <li><a href="{% url 'tasks:task_change_state' task.pk %}">change state</a></li>
+        <li><a href="{% url 'tasks:kanban_detail' task.kanban.pk %}">return</a></li>
+
+    </ul>
+
+
+
+{% endblock %}

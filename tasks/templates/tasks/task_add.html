@@ -1,0 +1,13 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>add</title>
+{% endblock %}
+{% block body %}
+    <h1>Add task</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form }}
+        <input type="submit" value="add task">
+        {% csrf_token %}
+    </form>
+    <a href="{% url 'tasks:kanban_detail' kanban_pk %}">return</a>
+{% endblock %}
