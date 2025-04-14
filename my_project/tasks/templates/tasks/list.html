@@ -1,0 +1,25 @@
+{% extends 'tasks/base.html' %}
+{% block title %}
+<title>main</title>
+{% endblock %}
+{% block body %}
+    <h1>TODO list</h1>
+        <ol>
+            {% for task in object_list %}
+                <li>
+                    <a href="{% url 'tasks:detail' task.id %}">{{ task }}</a>
+                    <a href="{% url 'tasks:delete' task.id %}">delete</a>
+                    <a href="{% url 'tasks:update' task.id %}">update</a>
+                </li>
+            
+            {% empty %}
+                <li>Нет задач. <a href="{% url 'tasks:add' %}">add task</a><br></li>
+                <style>
+                    .add_task_bottom {
+                        display: none;
+                    }
+                </style>
+            {% endfor %}
+        </ol>
+        <a href="{% url 'tasks:add' %}" class="add_task_bottom">add task</a><br>
+{% endblock %}
