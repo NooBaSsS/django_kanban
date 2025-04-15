@@ -107,11 +107,21 @@ class KanbanDetailView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["tasks_planned"] = Task.objects.filter(state="PLANNED")
-        context["tasks_assigned"] = Task.objects.filter(state="IN_PROGRESS")
-        context["tasks_review"] = Task.objects.filter(state="REVIEW")
-        context["tasks_done"] = Task.objects.filter(state="DONE")
-        context["tasks_overdue"] = Task.objects.filter(state="OVERDUE")
+        context["tasks_planned"] = Task.objects.filter(
+            state="PLANNED", kanban=self.get_object()
+        )
+        context["tasks_assigned"] = Task.objects.filter(
+            state="IN_PROGRESS", kanban=self.get_object()
+        )
+        context["tasks_review"] = Task.objects.filter(
+            state="REVIEW", kanban=self.get_object()
+        )
+        context["tasks_done"] = Task.objects.filter(
+            state="DONE", kanban=self.get_object()
+        )
+        context["tasks_overdue"] = Task.objects.filter(
+            state="OVERDUE", kanban=self.get_object()
+        )
         return context
 
 
