@@ -101,7 +101,7 @@ class Task(models.Model):
         )
         img.save(self.image.path)
 
-    def rename_image(self):  # FIXME: починить отображение по новому имени
+    def rename_image(self):
         img_ext = self.image.path.split(".")[-1]
         new_image_name = str(uuid4()) + "." + img_ext
         new_image_path = f"{settings.MEDIA_ROOT}/tasks/img/{new_image_name}"
@@ -165,4 +165,3 @@ class Task(models.Model):
             datetime_deadline__lte=now,
         )
         overdue_tasks.update(state="OVERDUE")
-
