@@ -26,9 +26,6 @@ from .models import Task, Kanban
 from django.utils import timezone
 
 tasks = [i for i in range(1, 11)]
-"""
-видеть список канбанов, в которых пользователь принимает участие
-"""
 
 
 class KanbanListView(UserPassesTestMixin, ListView):
