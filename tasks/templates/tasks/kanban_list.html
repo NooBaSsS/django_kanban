@@ -4,6 +4,7 @@
 {% endblock %}
 {% block body %}
     <h1>kanban list</h1>
+        <h2>Ваши канбаны</h2>
         <ol>
             {% for kanban in object_list %}
                 <li>
@@ -17,6 +18,14 @@
                         display: none;
                     }
                 </style>
+            {% endfor %}
+        </ol>
+        <h2>Канбаны, в которых вы участвуете</h2>
+        <ol>
+            {% for kanban in kanbans %}
+                <li>
+                    <a href="{% url 'tasks:kanban_detail' kanban.id %}">{{ kanban.title }}</a>
+                </li>
             {% endfor %}
         </ol>
         <a href="{% url 'tasks:kanban_add' %}" class="add_kanban_bottom">add kanban</a><br>

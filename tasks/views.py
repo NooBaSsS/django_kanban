@@ -27,7 +27,6 @@ from django.utils import timezone
 
 tasks = [i for i in range(1, 11)]
 """
-любой исполнитель одной задачи может видеть весь канбан
 видеть список канбанов, в которых пользователь принимает участие
 """
 
@@ -57,8 +56,11 @@ class KanbanListView(UserPassesTestMixin, ListView):
         return Kanban.objects.none()
 
     def get_context_data(self, **kwargs):
+        tasks = Task.objects.filter(executor=self.request.user)
+        kanbans = set(kanban.kanban for kanban in tasks)
         context = super().get_context_data(**kwargs)
         context["is_authenticated"] = self.request.user.is_authenticated
+        context["kanbans"] = kanbans
         return context
 
 
