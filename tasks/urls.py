@@ -33,4 +33,3 @@ urlpatterns = [
     path("logout/", views.AppLogoutView.as_view(), name="logout"),
     path("signin/", views.AppSignupView.as_view(), name="signup"),
 ]
-

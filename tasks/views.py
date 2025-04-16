@@ -93,8 +93,13 @@ class KanbanDetailView(UserPassesTestMixin, DetailView):
     context_object_name = "kanban"
 
     def test_func(self) -> bool:
+        executors = {self.get_object().owner}
+        tasks = Task.objects.filter(kanban=self.get_object())
+        for task in tasks:
+            executors.add(task.executor)
+        user_is_executor = self.request.user in executors
         kanban = self.get_object()
-        return kanban.owner == self.request.user
+        return kanban.owner == self.request.user and user_is_executor
 
     def handle_no_permission(self) -> HttpResponseRedirect:
         return HttpResponseForbidden(
